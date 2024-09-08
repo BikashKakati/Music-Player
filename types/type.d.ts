@@ -24,13 +24,13 @@ export declare interface SongListItemPropType {
 
 export declare interface SongType {
   id?: number;
-  songName?: string;
-  artistName?: string;
   attributes?:{
+    albumName?:string;
+    artistName?:string;
     name?:string;
-    previews:[{url?:string}];
+    previews:[{url?:string}]; // for song url
     artwork?:{
-      url:string;
+      url:string; // for image url
     }
   }
 }

@@ -1,4 +1,4 @@
-import songPlayingGif from "@/assets/images/Nt6v.gif"
+import songPlayingGif from "@/assets/images/playingTrack.gif"
 
 
 export const Images = {

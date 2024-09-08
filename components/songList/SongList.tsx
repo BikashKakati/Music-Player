@@ -4,9 +4,6 @@ import React, { useState } from "react";
 import { FlatList } from "react-native";
 import SongListItem from "./SongListItem";
 
-interface SongListPropType {
-  attributes: {};
-}
 
 const SongList = ({
   handleOpenMenu,
