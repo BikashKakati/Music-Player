@@ -1,4 +1,4 @@
-import {BottomSheetModalProvider} from "@gorhom/bottom-sheet";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -29,15 +29,15 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-        <BottomSheetModalProvider>
+      <BottomSheetModalProvider>
         <ThemeProvider value={DarkTheme}>
           <SafeAreaProvider>
             <RootLayout />
             <StatusBar style="auto" />
           </SafeAreaProvider>
         </ThemeProvider>
-    </BottomSheetModalProvider>
-      </GestureHandlerRootView>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 };
 

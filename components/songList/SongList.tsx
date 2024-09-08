@@ -1,41 +1,35 @@
-import { View, Text, FlatList } from "react-native";
+import { CurrentSongDetailsType, SongType } from "@/types/type";
+import { Audio } from "expo-av";
 import React, { useState } from "react";
+import { FlatList } from "react-native";
 import SongListItem from "./SongListItem";
-import { SongType } from "@/types/type";
 
-const SongList = ({handleOpenMenu}:{handleOpenMenu:()=>void}) => {
-  const [playSong, setPlaySong] = useState<string>("");
+interface SongListPropType {
+  attributes: {};
+}
 
-  const songList = [
-    {
-      id: 1,
-      songName: "ye ha",
-      artistName: "yulaa",
-    },
-    {
-      id: 2,
-      songName: "sad jii",
-      artistName: "buhaji",
-    },
-    {
-      id: 3,
-      songName: "suio",
-      artistName: "tiju butta",
-    },
-  ];
-
-
+const SongList = ({
+  handleOpenMenu,
+  songList,
+}: {
+  handleOpenMenu: () => void;
+  songList: SongType[];
+}) => {
+  const [currentSongDetails, setCurrentSongDetails] =
+    useState<CurrentSongDetailsType>({ songName: "", isPlaying: false });
+  const [currentSound, setCurrentSound] = useState<Audio.Sound | undefined>();
 
   return (
     <FlatList
       data={songList}
       renderItem={({ item }: { item: SongType }) => (
         <SongListItem
-        handleOpenMenu={handleOpenMenu}
-          playSong={playSong}
-          setPlaySong={setPlaySong}
-          songName={item.songName}
-          artistName={item.artistName}
+          handleOpenMenu={handleOpenMenu}
+          currentSongDetails={currentSongDetails}
+          setCurrentSongDetails={setCurrentSongDetails}
+          song={item}
+          currentSound={currentSound}
+          setCurrentSound={setCurrentSound}
         />
       )}
     />
