@@ -1,3 +1,4 @@
+import { store } from "@/services/redux/store";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
@@ -7,7 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Provider } from "react-redux";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -31,10 +32,13 @@ const App = () => {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <ThemeProvider value={DarkTheme}>
-          <SafeAreaProvider>
+        <Provider store={store}>
+
             <RootLayout />
             <StatusBar style="auto" />
-          </SafeAreaProvider>
+
+
+        </Provider>
         </ThemeProvider>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
