@@ -24,12 +24,12 @@ export declare interface SongListItemPropType {
 
 export declare interface SongType {
   id?: number;
-  attributes?:{
-    albumName?:string;
-    artistName?:string;
-    name?:string;
-    previews:[{url?:string}]; // for song url
-    artwork?:{
+  attributes:{
+    albumName:string;
+    artistName:string;
+    name:string;
+    previews:[{url:string}]; // for song url
+    artwork:{
       url:string; // for image url
     }
   }

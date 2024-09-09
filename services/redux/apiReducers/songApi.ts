@@ -12,7 +12,7 @@ export const songApi = createApi({
     }),
     endpoints:(builder)=>({
         getWorldTopSongs: builder.query({
-            query:()=> `/charts/get-top-songs-in-world?limit=10`
+            query:(limit)=> `/charts/get-top-songs-in-world?limit=${limit}`
         })
     })
 })
