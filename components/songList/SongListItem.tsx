@@ -1,16 +1,17 @@
 import { Images } from "@/constants";
+import { setCurrentPlayingSongDetails, setIsSongPlaying } from "@/services/redux/sliceReducers/songSlice";
 import { SongListItemPropType } from "@/types/type.d";
 import { getLimitedFormattedText } from "@/utils";
 import { Audio } from "expo-av";
-import { EllipsisVertical, Pause, PlayCircle } from "lucide-react-native";
-import React, { useRef, useState } from "react";
+import { EllipsisVertical, PlayCircle } from "lucide-react-native";
+import React from "react";
 import {
   Image,
-  ImageSourcePropType,
   Text,
   TouchableHighlight,
-  View,
+  View
 } from "react-native";
+import { useDispatch } from "react-redux";
 
 const SongListItem = ({
   song,
@@ -20,11 +21,35 @@ const SongListItem = ({
   currentSound,
   setCurrentSound,
 }: SongListItemPropType) => {
+  const dispatch = useDispatch();
+
   async function handlePlaySong(
     songName: string = "",
     playbackUrl: string | undefined = ""
   ) {
-    if (currentSongDetails.songName === songName) {
+    const isPlayaingAlready = await handlePlayPauseIfAlreayPlaying(songName);
+    if(isPlayaingAlready) return;
+    
+    const {sound, status} = await handleAudio(playbackUrl);
+    setCurrentSound(sound);
+    setCurrentSongDetails({
+      songName,
+      isPlaying: status.isLoaded && status.isPlaying,
+    });
+
+    dispatch(setCurrentPlayingSongDetails({
+      albumName: song?.attributes?.albumName,
+      artistName: song?.attributes?.artistName,
+      songName: song?.attributes?.name,
+      songImageUrl: song?.attributes?.artwork?.url,
+      songTrackUrl: song?.attributes?.previews[0]?.url,
+    }));
+    dispatch(setIsSongPlaying(status.isLoaded));
+  }
+
+
+  async function handlePlayPauseIfAlreayPlaying(currentSongName:string){
+    if (currentSongDetails.songName === currentSongName) {
       if (currentSongDetails.isPlaying) {
         await currentSound?.pauseAsync();
       } else {
@@ -34,15 +59,20 @@ const SongListItem = ({
         ...prev,
         isPlaying: !prev.isPlaying,
       }));
-      return;
+      return true;
     }
     currentSound?.stopAsync();
+    setCurrentSound(undefined);
+    return false;
+  }
+
+  async function handleAudio(playbackUrl:string){
     await Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,
       staysActiveInBackground: true,
       shouldDuckAndroid: false,
     });
-    const { sound, status } = await Audio.Sound.createAsync(
+    const soundState = await Audio.Sound.createAsync(
       {
         uri: playbackUrl,
       },
@@ -51,13 +81,9 @@ const SongListItem = ({
         isLooping: false,
       }
     );
-    await sound.playAsync();
-    setCurrentSound(sound);
-    setCurrentSongDetails({
-      songName,
-      isPlaying: status.isLoaded && status.isPlaying,
-    });
+    return soundState;
   }
+
 
   return (
     <TouchableHighlight
