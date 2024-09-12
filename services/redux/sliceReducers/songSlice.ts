@@ -11,6 +11,7 @@ interface CurrentSongDetailsType {
 }
 interface InitialStateType {
   currentPlayingSongDetails: CurrentSongDetailsType;
+  isAnySongLoaded:boolean;
   isPlaying: boolean;
 }
 
@@ -22,7 +23,8 @@ const initialState: InitialStateType = {
     songImageUrl: "",
     songTrackUrl: "",
   },
-  isPlaying: false,
+  isAnySongLoaded: false,
+  isPlaying:false,
 };
 export const songSlice = createSlice({
   name: "songSlice",
@@ -30,6 +32,9 @@ export const songSlice = createSlice({
   reducers: {
     setCurrentPlayingSongDetails: function (state, action) {
       state.currentPlayingSongDetails = action.payload;
+    },
+    setIsSongLoaded: function (state, action) {
+      state.isAnySongLoaded = action.payload;
     },
     setIsSongPlaying: function (state, action) {
       state.isPlaying = action.payload;
@@ -40,4 +45,5 @@ export const songSlice = createSlice({
 export const {
   setCurrentPlayingSongDetails,
   setIsSongPlaying,
+  setIsSongLoaded
 } = songSlice.actions;

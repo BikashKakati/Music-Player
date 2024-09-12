@@ -1,7 +1,7 @@
 import { Images } from "@/constants";
-import { setCurrentPlayingSongDetails, setIsSongPlaying } from "@/services/redux/sliceReducers/songSlice";
+import { setCurrentPlayingSongDetails, setIsSongLoaded, setIsSongPlaying } from "@/services/redux/sliceReducers/songSlice";
 import { SongListItemPropType } from "@/types/type.d";
-import { getLimitedFormattedText } from "@/utils";
+import { getFormattedImageUrl, getLimitedFormattedText } from "@/utils";
 import { Audio } from "expo-av";
 import { EllipsisVertical, PlayCircle } from "lucide-react-native";
 import React from "react";
@@ -44,7 +44,8 @@ const SongListItem = ({
       songImageUrl: song?.attributes?.artwork?.url,
       songTrackUrl: song?.attributes?.previews[0]?.url,
     }));
-    dispatch(setIsSongPlaying(status.isLoaded));
+    dispatch(setIsSongLoaded(status.isLoaded));
+    dispatch(setIsSongPlaying( status.isLoaded && status.isPlaying));
   }
 
 
@@ -101,9 +102,7 @@ const SongListItem = ({
         <View className="w-16 h-full rounded-lg overflow-hidden relative">
           <Image
             source={{
-              uri: song?.attributes?.artwork?.url
-                ?.replace("{w}", "300")
-                .replace("{h}", "300"),
+              uri: getFormattedImageUrl(song?.attributes?.artwork?.url),
             }}
             className="w-full h-full"
           />
@@ -112,7 +111,7 @@ const SongListItem = ({
               {currentSongDetails.isPlaying ? (
                 <Image className="w-8 h-8" source={Images.songPlayingGif} />
               ) : (
-                <PlayCircle className="w-2 h-2" color={"white"} />
+                <PlayCircle size={19} color={"white"} />
               )}
             </View>
           )}
