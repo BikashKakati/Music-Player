@@ -8,12 +8,13 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
+import {AVPlaybackStatus, Audio} from "expo-av";
+import Loader from "@/components/Loader";
 
 const home = () => {
   const songActionRef = useRef<BottomSheetModal>(null);
-  const {data:resonse} = useGetWorldTopSongsQuery(10);
+  const {data:resonse, isLoading} = useGetWorldTopSongsQuery(10);
   const {currentPlayingSongDetails} = useSelector((state:RootState)=> state.songSlice);
-  console.log(currentPlayingSongDetails);
 
   const handleOpenMenu = useCallback(function () {
     songActionRef.current?.present();
@@ -21,9 +22,16 @@ const home = () => {
 
 
   return (
-    <Wrapper className="flex-1 px-4">
+    <Wrapper className="flex-1">
       <Text className="text-2xl text-white font-bold mb-4">Top Songs</Text>
-      <SongList handleOpenMenu={handleOpenMenu} songList={resonse?.data}/>
+      {
+        isLoading ? 
+        (<Loader/>)
+        :
+        (
+          <SongList handleOpenMenu={handleOpenMenu} songList={resonse?.data}/>
+        )
+      }
       <CustomBottomSheet ref={songActionRef} snapPoints={["45%"]} color="#333">
         <Text className="text-white">Bikash</Text>
       </CustomBottomSheet>
