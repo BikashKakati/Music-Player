@@ -1,5 +1,6 @@
 import { Images } from "@/constants";
-import { setCurrentPlayingSongDetails, setIsSongLoaded, setIsSongPlaying } from "@/services/redux/sliceReducers/songSlice";
+import { setAudioState, setAudioStatusState, setCurrentPlayingSongDetails} from "@/services/redux/sliceReducers/songSlice";
+import { RootState } from "@/services/redux/store";
 import { SongListItemPropType } from "@/types/type.d";
 import { getFormattedImageUrl, getLimitedFormattedText } from "@/utils";
 import { Audio } from "expo-av";
@@ -11,17 +12,14 @@ import {
   TouchableHighlight,
   View
 } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const SongListItem = ({
   song,
-  currentSongDetails,
   handleOpenMenu,
-  setCurrentSongDetails,
-  currentSound,
-  setCurrentSound,
 }: SongListItemPropType) => {
   const dispatch = useDispatch();
+  const {currentAudioState, currentAudioStatusState,currentPlayingSongDetails} = useSelector((state:RootState)=>state.songSlice);
 
   async function handlePlaySong(
     songName: string = "",
@@ -31,12 +29,6 @@ const SongListItem = ({
     if(isPlayaingAlready) return;
     
     const {sound, status} = await handleAudio(playbackUrl);
-    setCurrentSound(sound);
-    setCurrentSongDetails({
-      songName,
-      isPlaying: status.isLoaded && status.isPlaying,
-    });
-
     dispatch(setCurrentPlayingSongDetails({
       albumName: song?.attributes?.albumName,
       artistName: song?.attributes?.artistName,
@@ -44,30 +36,30 @@ const SongListItem = ({
       songImageUrl: song?.attributes?.artwork?.url,
       songTrackUrl: song?.attributes?.previews[0]?.url,
     }));
-    dispatch(setIsSongLoaded(status.isLoaded));
-    dispatch(setIsSongPlaying( status.isLoaded && status.isPlaying));
+    dispatch(setAudioState(sound));
+    dispatch(setAudioStatusState(status));
   }
 
 
   async function handlePlayPauseIfAlreayPlaying(currentSongName:string){
-    if (currentSongDetails.songName === currentSongName) {
-      if (currentSongDetails.isPlaying) {
-        await currentSound?.pauseAsync();
+    if (currentPlayingSongDetails.songName === currentSongName) {
+      if (currentAudioStatusState?.isLoaded && currentAudioStatusState.isPlaying) {
+        const status = await currentAudioState?.pauseAsync();
+        dispatch(setAudioStatusState(status));
       } else {
-        await currentSound?.playAsync();
+        const status = await currentAudioState?.playAsync();
+        dispatch(setAudioStatusState(status));
       }
-      setCurrentSongDetails((prev) => ({
-        ...prev,
-        isPlaying: !prev.isPlaying,
-      }));
       return true;
     }
-    currentSound?.stopAsync();
-    setCurrentSound(undefined);
     return false;
   }
 
   async function handleAudio(playbackUrl:string){
+    await currentAudioState?.stopAsync();
+    await currentAudioState?.unloadAsync();
+
+
     await Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,
       staysActiveInBackground: true,
@@ -106,9 +98,9 @@ const SongListItem = ({
             }}
             className="w-full h-full"
           />
-          {currentSongDetails.songName === song?.attributes?.name && (
+          {currentPlayingSongDetails.songName === song?.attributes?.name && (
             <View className="w-full h-full absolute top-0 left-0 flex items-center justify-center bg-black/40">
-              {currentSongDetails.isPlaying ? (
+              {currentAudioStatusState?.isLoaded && currentAudioStatusState.isPlaying ? (
                 <Image className="w-8 h-8" source={Images.songPlayingGif} />
               ) : (
                 <PlayCircle size={19} color={"white"} />
@@ -120,7 +112,7 @@ const SongListItem = ({
         <View className="flex-1">
           <Text
             className={`text-[16px] font-Jakarta ${
-              currentSongDetails.songName === song?.attributes?.name
+              currentPlayingSongDetails.songName === song?.attributes?.name
                 ? "text-primary"
                 : "text-white"
             }`}
@@ -129,7 +121,7 @@ const SongListItem = ({
           </Text>
           <Text
             className={`text-[11px] font-Jakarta ${
-              currentSongDetails.songName === song?.attributes?.name
+              currentPlayingSongDetails.songName === song?.attributes?.name
                 ? "text-primary"
                 : "text-muted"
             }`}

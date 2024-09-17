@@ -1,6 +1,7 @@
 import { SongType } from "@/types/type";
-import { createSlice } from "@reduxjs/toolkit";
-import { Audio } from "expo-av";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { AVPlaybackStatus, Audio } from "expo-av";
+import { Sound } from "expo-av/build/Audio";
 
 interface CurrentSongDetailsType {
   albumName: string;
@@ -11,8 +12,8 @@ interface CurrentSongDetailsType {
 }
 interface InitialStateType {
   currentPlayingSongDetails: CurrentSongDetailsType;
-  isAnySongLoaded:boolean;
-  isPlaying: boolean;
+  currentAudioState: Sound | null;
+  currentAudioStatusState: AVPlaybackStatus | null;
 }
 
 const initialState: InitialStateType = {
@@ -23,27 +24,27 @@ const initialState: InitialStateType = {
     songImageUrl: "",
     songTrackUrl: "",
   },
-  isAnySongLoaded: false,
-  isPlaying:false,
+  currentAudioState:null,
+  currentAudioStatusState:null,
 };
 export const songSlice = createSlice({
   name: "songSlice",
   initialState,
   reducers: {
+    setAudioState:function(state, action){
+      state.currentAudioState = action.payload;
+    },
+    setAudioStatusState:function(state,action){
+      state.currentAudioStatusState = action.payload;
+    },
     setCurrentPlayingSongDetails: function (state, action) {
       state.currentPlayingSongDetails = action.payload;
-    },
-    setIsSongLoaded: function (state, action) {
-      state.isAnySongLoaded = action.payload;
-    },
-    setIsSongPlaying: function (state, action) {
-      state.isPlaying = action.payload;
     },
   },
 });
 
 export const {
+  setAudioState,
   setCurrentPlayingSongDetails,
-  setIsSongPlaying,
-  setIsSongLoaded
+  setAudioStatusState
 } = songSlice.actions;

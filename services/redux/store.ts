@@ -11,7 +11,8 @@ export const store = configureStore({
     middleware:(getDefaultMiddlewares)=> getDefaultMiddlewares({
         serializableCheck: {
           // Ignore these action types
-          ignoredActions: ['songSlice/setCurrentSoundState'],
+          ignoredActions: ['songSlice/setAudioState','songSlice/setAudioStatusState',],
+          ignoredPaths:['songSlice.currentAudioState','songSlice.currentAudioStatusState'],
         },
       }).concat(songApi.middleware),
 })
