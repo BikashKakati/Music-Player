@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 interface WrapperPropType{
-    className:string,
+    className?:string,
     children:ReactNode
 }
 

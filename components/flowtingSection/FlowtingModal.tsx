@@ -1,39 +1,56 @@
-import { View, Text, Image, Touchable, Pressable } from "react-native";
-import React from "react";
-import { useSelector } from "react-redux";
+import { setAudioStatusState } from "@/services/redux/sliceReducers/songSlice";
 import { RootState } from "@/services/redux/store";
-import { getFormattedImageUrl } from "@/utils";
+import { getFormattedImageUrl, getLimitedFormattedText } from "@/utils";
 import {
-  Play,
+  PauseCircle,
   PlayCircle,
   SkipBack,
-  SkipBackIcon,
-  SkipForward,
+  SkipForward
 } from "lucide-react-native";
+import React from "react";
+import { Image, Text, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
+import { useDispatch, useSelector } from "react-redux";
 
-const FlowtingModal = () => {
-  const { currentPlayingSongDetails } = useSelector(
+interface FlowtingModalPropType{
+  onPress:()=>void;
+}
+
+const FlowtingModal = ({onPress}:FlowtingModalPropType) => {
+  const { currentPlayingSongDetails, currentAudioState, currentAudioStatusState} = useSelector(
     (state: RootState) => state.songSlice
   );
+  const dispatch = useDispatch();
 
-  function handlePrevious() {
-    console.log("going to next");
+  async function handlePrevious() {
+   const status = await currentAudioState?.pauseAsync();
+   dispatch(setAudioStatusState(status));
   }
+  async function handlePlayPause(){
+    if(currentAudioStatusState?.isLoaded && currentAudioStatusState.isPlaying){
+      const status = await currentAudioState?.pauseAsync();
+      dispatch(setAudioStatusState(status));
+    }else{
+      const status = await currentAudioState?.playAsync();
+      dispatch(setAudioStatusState(status));
+    }
+  }
+
   return (
-    <View className="absolute h-16 w-full bottom-12 left-0 right-0">
-      <View className="w-[328px] h-full bg-zinc-800 mx-auto rounded-lg overflow-hidden flex flex-row items-center justify-between">
+    <TouchableHighlight onPress={onPress}>
+      <View className="absolute h-16 w-full bottom-[50px] left-0 right-0">
+      <View className="w-[330px] h-full bg-zinc-800 mx-auto rounded-lg overflow-hidden flex flex-row items-center justify-between">
         <View className="flex-1 flex flex-row items-center space-x-3 h-full">
           <Image
             source={{
               uri: getFormattedImageUrl(
-                currentPlayingSongDetails?.songImageUrl
+                currentPlayingSongDetails?.songImageUrl || ""
               ),
             }}
             className="h-full w-16 object-cover"
           />
           <Text className="text-white">
-            {currentPlayingSongDetails?.songName}
+            {getLimitedFormattedText(currentPlayingSongDetails?.songName,12)}
           </Text>
         </View>
         <View className="flex flex-row mr-3 h-full items-center">
@@ -41,20 +58,26 @@ const FlowtingModal = () => {
             className="h-fit w-fit rounded-full p-2"
             onPress={handlePrevious}
           >
-            <SkipBack size={24} className="text-white" />
+            <SkipBack size={20} className="text-white" />
           </TouchableHighlight>
-          <TouchableHighlight onPress={handlePrevious} className="p-2 rounded-full">
-            <Play size={32} className="text-white" />
+          <TouchableHighlight onPress={handlePlayPause} className="p-2 rounded-full">
+            {
+             ( currentAudioStatusState?.isLoaded && currentAudioStatusState.isPlaying) ?
+             <PauseCircle size={28} className="text-white"/>
+             :
+             <PlayCircle size={28} className="text-white" />
+            }
           </TouchableHighlight>
           <TouchableHighlight
             className="h-fit w-fit rounded-full p-2"
             onPress={handlePrevious}
           >
-            <SkipForward size={24} className="text-white" />
+            <SkipForward size={20} className="text-white" />
           </TouchableHighlight>
         </View>
       </View>
     </View>
+    </TouchableHighlight>
   );
 };
 

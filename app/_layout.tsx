@@ -30,17 +30,17 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+        <Provider store={store}>
       <BottomSheetModalProvider>
         <ThemeProvider value={DarkTheme}>
-        <Provider store={store}>
 
             <RootLayout />
             <StatusBar style="auto" />
 
 
-        </Provider>
         </ThemeProvider>
       </BottomSheetModalProvider>
+        </Provider>
     </GestureHandlerRootView>
   );
 };
