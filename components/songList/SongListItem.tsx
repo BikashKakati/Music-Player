@@ -1,82 +1,129 @@
 import { Images } from "@/constants";
-import { setAudioState, setAudioStatusState, setCurrentPlayingSongDetails} from "@/services/redux/sliceReducers/songSlice";
+import {
+  setAudioState,
+  setAudioStatusState,
+  setCurrentPlayingSongDetails,
+  setCurrentPosition,
+} from "@/services/redux/sliceReducers/songSlice";
 import { RootState } from "@/services/redux/store";
 import { SongListItemPropType } from "@/types/type.d";
-import { getFormattedImageUrl, getLimitedFormattedText } from "@/utils";
-import { Audio } from "expo-av";
+import { getFormattedImageUrl, getLimitedFormattedText, handleAudio } from "@/utils";
 import { EllipsisVertical, PlayCircle } from "lucide-react-native";
-import React from "react";
-import {
-  Image,
-  Text,
-  TouchableHighlight,
-  View
-} from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Image, Text, TouchableHighlight, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
-const SongListItem = ({
-  song,
-  handleOpenMenu,
-}: SongListItemPropType) => {
+const SongListItem = ({ song, handleOpenMenu }: SongListItemPropType) => {
   const dispatch = useDispatch();
-  const {currentAudioState, currentAudioStatusState,currentPlayingSongDetails} = useSelector((state:RootState)=>state.songSlice);
+  const {
+    currentAudioState,
+    currentAudioStatusState,
+    currentPlayingSongDetails,
+    currentSongPosition,
+  } = useSelector((state: RootState) => state.songSlice);
+
+  const timeIntervalRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (currentPlayingSongDetails?.songName === song?.attributes?.name) {
+      controlSongIncreamenter();
+    }
+
+    return () => {
+      clearInterval(timeIntervalRef.current);
+    };
+  }, [
+    currentAudioStatusState?.isLoaded && currentAudioStatusState?.isPlaying,
+    currentSongPosition,
+  ]);
+
+  async function controlSongIncreamenter() {
+    if (timeIntervalRef.current) {
+      clearInterval(timeIntervalRef.current);
+    }
+
+    if (
+      currentAudioStatusState?.isLoaded &&
+      currentAudioStatusState.isPlaying &&
+        currentSongPosition >= Math.round(currentAudioStatusState.durationMillis! / 1000) * 1000
+    ) {
+      timeIntervalRef.current = null;
+      const status = await currentAudioState?.stopAsync();
+      dispatch(setAudioStatusState(status));
+      return;
+    }
+
+    if (
+      currentAudioStatusState?.isLoaded &&
+      currentAudioStatusState.isPlaying
+    ) {
+      timeIntervalRef.current = setInterval(() => {
+        dispatch(setCurrentPosition(currentSongPosition + 1000));
+      }, 1000);
+    }
+  }
 
   async function handlePlaySong(
     songName: string = "",
     playbackUrl: string | undefined = ""
   ) {
-    const isPlayaingAlready = await handlePlayPauseIfAlreayPlaying(songName);
-    if(isPlayaingAlready) return;
-    
-    const {sound, status} = await handleAudio(playbackUrl);
-    dispatch(setCurrentPlayingSongDetails({
-      albumName: song?.attributes?.albumName,
-      artistName: song?.attributes?.artistName,
-      songName: song?.attributes?.name,
-      songImageUrl: song?.attributes?.artwork?.url,
-      songTrackUrl: song?.attributes?.previews[0]?.url,
-    }));
-    dispatch(setAudioState(sound));
-    dispatch(setAudioStatusState(status));
-  }
-
-
-  async function handlePlayPauseIfAlreayPlaying(currentSongName:string){
-    if (currentPlayingSongDetails.songName === currentSongName) {
-      if (currentAudioStatusState?.isLoaded && currentAudioStatusState.isPlaying) {
-        const status = await currentAudioState?.pauseAsync();
-        dispatch(setAudioStatusState(status));
-      } else {
-        const status = await currentAudioState?.playAsync();
-        dispatch(setAudioStatusState(status));
+    try {
+      const isPlayingAlready = await handlePlayPauseIfAlreayPlaying(songName);
+      if (isPlayingAlready) return;
+  
+      if (currentAudioState) {
+        await currentAudioState.unloadAsync();
+        dispatch(setAudioState(null)); 
       }
-      return true;
+  
+      const { sound, status } = await handleAudio(playbackUrl);
+  
+      dispatch(
+        setCurrentPlayingSongDetails({
+          albumName: song?.attributes?.albumName,
+          artistName: song?.attributes?.artistName,
+          songName: song?.attributes?.name,
+          songImageUrl: song?.attributes?.artwork?.url,
+          songTrackUrl: song?.attributes?.previews[0]?.url,
+        })
+      );
+  
+      dispatch(setAudioState(sound));
+      dispatch(setAudioStatusState(status));
+      dispatch(setCurrentPosition(0));
+    } catch (error) {
+      console.error("Error playing the song:", error);
+    }
+  }
+  async function handlePlayPauseIfAlreayPlaying(currentSongName: string) {
+    if (currentPlayingSongDetails?.songName === currentSongName) {
+      try {
+        if (currentAudioState && currentAudioStatusState?.isLoaded) {
+          if (currentAudioStatusState.isPlaying) {
+            await currentAudioState.pauseAsync();
+          } else {
+            if (
+              Math.round(currentAudioStatusState.durationMillis! / 1000) * 1000 >
+              currentSongPosition
+            ) {
+              await currentAudioState.playAsync();
+            } else {
+              await currentAudioState.replayAsync({ shouldPlay: true });
+            }
+          }
+    
+          const status = await currentAudioState.getStatusAsync();
+          dispatch(setAudioStatusState(status));
+          return true;
+        }
+      } catch (error) {
+        console.error('Error handling play/pause:', error);
+      }
     }
     return false;
   }
 
-  async function handleAudio(playbackUrl:string){
-    await currentAudioState?.stopAsync();
-    await currentAudioState?.unloadAsync();
-
-
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: true,
-      shouldDuckAndroid: false,
-    });
-    const soundState = await Audio.Sound.createAsync(
-      {
-        uri: playbackUrl,
-      },
-      {
-        shouldPlay: true,
-        isLooping: false,
-      }
-    );
-    return soundState;
-  }
-
+  
 
   return (
     <TouchableHighlight
@@ -98,9 +145,10 @@ const SongListItem = ({
             }}
             className="w-full h-full"
           />
-          {currentPlayingSongDetails.songName === song?.attributes?.name && (
+          {currentPlayingSongDetails?.songName === song?.attributes?.name && (
             <View className="w-full h-full absolute top-0 left-0 flex items-center justify-center bg-black/40">
-              {currentAudioStatusState?.isLoaded && currentAudioStatusState.isPlaying ? (
+              {currentAudioStatusState?.isLoaded &&
+              currentAudioStatusState.isPlaying ? (
                 <Image className="w-8 h-8" source={Images.songPlayingGif} />
               ) : (
                 <PlayCircle size={19} color={"white"} />
@@ -112,7 +160,7 @@ const SongListItem = ({
         <View className="flex-1">
           <Text
             className={`text-[16px] font-Jakarta ${
-              currentPlayingSongDetails.songName === song?.attributes?.name
+              currentPlayingSongDetails?.songName === song?.attributes?.name
                 ? "text-primary"
                 : "text-white"
             }`}
@@ -121,7 +169,7 @@ const SongListItem = ({
           </Text>
           <Text
             className={`text-[11px] font-Jakarta ${
-              currentPlayingSongDetails.songName === song?.attributes?.name
+              currentPlayingSongDetails?.songName === song?.attributes?.name
                 ? "text-primary"
                 : "text-muted"
             }`}

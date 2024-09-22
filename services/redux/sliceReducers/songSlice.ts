@@ -11,9 +11,10 @@ interface CurrentSongDetailsType {
   songTrackUrl: string;
 }
 interface InitialStateType {
-  currentPlayingSongDetails: CurrentSongDetailsType;
+  currentPlayingSongDetails: CurrentSongDetailsType | null;
   currentAudioState: Sound | null;
   currentAudioStatusState: AVPlaybackStatus | null;
+  currentSongPosition:number;
 }
 
 const initialState: InitialStateType = {
@@ -26,6 +27,7 @@ const initialState: InitialStateType = {
   },
   currentAudioState:null,
   currentAudioStatusState:null,
+  currentSongPosition:0,
 };
 export const songSlice = createSlice({
   name: "songSlice",
@@ -40,11 +42,15 @@ export const songSlice = createSlice({
     setCurrentPlayingSongDetails: function (state, action) {
       state.currentPlayingSongDetails = action.payload;
     },
+    setCurrentPosition:function(state,action){
+      state.currentSongPosition = action.payload;
+    }
   },
 });
 
 export const {
   setAudioState,
   setCurrentPlayingSongDetails,
-  setAudioStatusState
+  setAudioStatusState,
+  setCurrentPosition
 } = songSlice.actions;
