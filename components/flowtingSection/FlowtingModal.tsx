@@ -50,7 +50,7 @@ const FlowtingModal = ({onPress}:FlowtingModalPropType) => {
             className="h-full w-16 object-cover"
           />
           <Text className="text-white">
-            {getLimitedFormattedText(currentPlayingSongDetails?.songName,12)}
+            {getLimitedFormattedText(currentPlayingSongDetails?.songName,15)}
           </Text>
         </View>
         <View className="flex flex-row mr-3 h-full items-center">

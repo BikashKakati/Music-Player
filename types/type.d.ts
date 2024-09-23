@@ -15,11 +15,7 @@ export declare interface CurrentSongDetailsType{
 }
 export declare interface SongListItemPropType {
   song:SongType;
-  currentSongDetails:CurrentSongDetailsType;
-  setCurrentSongDetails: React.Dispatch<React.SetStateAction<CurrentSongDetailsType>>;
   handleOpenMenu: () => void;
-  currentSound:Audio.Sound|undefined;
-  setCurrentSound:React.Dispatch<React.SetStateAction<Audio.Sound|undefined>>;
 }
 
 export declare interface SongType {

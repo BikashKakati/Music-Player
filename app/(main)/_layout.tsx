@@ -28,7 +28,7 @@ const MainLayout = () => {
 
       {currentAudioStatusState?.isLoaded && <FlowtingModal onPress={handleOpenSongPlayingModal}/>}
 
-      <CustomBottomSheet ref={songModalRef} snapPoints={["100%"]} color="#333">
+      <CustomBottomSheet ref={songModalRef} snapPoints={["100%"]} color="#000">
         <SongDetailsModal/>
       </CustomBottomSheet>
     </>

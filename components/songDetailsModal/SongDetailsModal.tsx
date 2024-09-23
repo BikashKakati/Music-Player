@@ -1,3 +1,4 @@
+import { useGetWorldTopSongsQuery } from "@/services/redux/apiReducers/songApi";
 import { setAudioStatusState } from "@/services/redux/sliceReducers/songSlice";
 import { RootState } from "@/services/redux/store";
 import { getFormattedImageUrl } from "@/utils";
@@ -11,11 +12,13 @@ import {
   SkipForward
 } from "lucide-react-native";
 import React, { useCallback, useMemo } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, TouchableHighlight, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const SongDetailsModal = () => {
   const dispatch = useDispatch();
+  const {data:resonse, isLoading} = useGetWorldTopSongsQuery(10);
+  
   const {
     currentPlayingSongDetails,
     currentAudioStatusState,
@@ -66,6 +69,13 @@ const SongDetailsModal = () => {
       }
     } catch (error) {
       console.error('Error handling play/pause:', error);
+    }
+  }
+
+  async function handlePlayNextSong(){
+    if(currentAudioState){
+      await currentAudioState?.stopAsync();
+      await currentAudioState?.unloadAsync();
     }
   }
   
@@ -121,7 +131,7 @@ const SongDetailsModal = () => {
         <View className="flex flex-row items-center justify-between mt-14">
           <Repeat size={23} className="text-white" />
           <SkipBack size={25} className="text-white" />
-          <Pressable onPress={handlePlayPause}>
+          <TouchableHighlight onPress={handlePlayPause}>
             <View className="w-20 h-20 flex items-center justify-center border-4 border-gray-400 bg-transparent rounded-full">
               {currentAudioStatusState?.isLoaded &&
               currentAudioStatusState.isPlaying ? (
@@ -130,8 +140,10 @@ const SongDetailsModal = () => {
                 <Play size={25} className="text-white" />
               )}
             </View>
-          </Pressable>
+          </TouchableHighlight>
+          <TouchableHighlight onPress={handlePlayNextSong}>
           <SkipForward size={25} className="text-white" />
+          </TouchableHighlight>
           <List size={23} className="text-white" />
         </View>
       </View>
