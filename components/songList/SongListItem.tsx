@@ -13,7 +13,7 @@ import React, { useEffect, useRef } from "react";
 import { Image, Text, TouchableHighlight, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
-const SongListItem = ({ song, handleOpenMenu }: SongListItemPropType) => {
+const SongListItem = ({ song, handleOpenMenu,songIndex}: SongListItemPropType) => {
   const dispatch = useDispatch();
   const {
     currentAudioState,
@@ -85,6 +85,7 @@ const SongListItem = ({ song, handleOpenMenu }: SongListItemPropType) => {
           songName: song?.attributes?.name,
           songImageUrl: song?.attributes?.artwork?.url,
           songTrackUrl: song?.attributes?.previews[0]?.url,
+          songIndex,
         })
       );
   

@@ -1,7 +1,12 @@
 import { useGetWorldTopSongsQuery } from "@/services/redux/apiReducers/songApi";
-import { setAudioStatusState } from "@/services/redux/sliceReducers/songSlice";
+import {
+  setAudioState,
+  setAudioStatusState,
+  setCurrentPlayingSongDetails,
+  setCurrentPosition,
+} from "@/services/redux/sliceReducers/songSlice";
 import { RootState } from "@/services/redux/store";
-import { getFormattedImageUrl } from "@/utils";
+import { getFormattedImageUrl, handleAudio } from "@/utils";
 import {
   Heart,
   List,
@@ -9,7 +14,7 @@ import {
   Play,
   Repeat,
   SkipBack,
-  SkipForward
+  SkipForward,
 } from "lucide-react-native";
 import React, { useCallback, useMemo } from "react";
 import { Image, Pressable, Text, TouchableHighlight, View } from "react-native";
@@ -17,8 +22,8 @@ import { useDispatch, useSelector } from "react-redux";
 
 const SongDetailsModal = () => {
   const dispatch = useDispatch();
-  const {data:resonse, isLoading} = useGetWorldTopSongsQuery(10);
-  
+  const { data: resonse, isLoading } = useGetWorldTopSongsQuery(10);
+
   const {
     currentPlayingSongDetails,
     currentAudioStatusState,
@@ -26,12 +31,14 @@ const SongDetailsModal = () => {
     currentSongPosition,
   } = useSelector((state: RootState) => state.songSlice);
 
-
-  const getIncreament = useCallback(function () {
-    if (currentAudioStatusState?.isLoaded) {
-      return currentSongPosition / currentAudioStatusState.durationMillis!;
-    }
-  },[currentSongPosition, currentAudioStatusState?.isLoaded])
+  const getIncreamentStatus = useCallback(
+    function () {
+      if (currentAudioStatusState?.isLoaded) {
+        return currentSongPosition / currentAudioStatusState.durationMillis!;
+      }
+    },
+    [currentSongPosition, currentAudioStatusState?.isLoaded]
+  );
 
   function getFormattedTime(timeDuraton: number | undefined): string {
     const totalSeconds = Math.floor(timeDuraton! / 1000);
@@ -62,25 +69,75 @@ const SongDetailsModal = () => {
             await currentAudioState.replayAsync({ shouldPlay: true });
           }
         }
-  
+
         // Update the state after the operation completes
         const status = await currentAudioState.getStatusAsync();
         dispatch(setAudioStatusState(status));
       }
     } catch (error) {
-      console.error('Error handling play/pause:', error);
+      console.error("Error handling play/pause:", error);
     }
   }
 
-  async function handlePlayNextSong(){
-    if(currentAudioState){
+  async function handlePlayNextSong() {
+    if (currentAudioState) {
       await currentAudioState?.stopAsync();
       await currentAudioState?.unloadAsync();
     }
+    const songsData = resonse?.data || [];
+    const currentSongIndex = currentPlayingSongDetails?.songIndex!;
+    const nextSongIndex =
+      currentSongIndex + 1 >= songsData.length - 1 ? 0 : currentSongIndex + 1;
+    const nextSongDetails = songsData?.[nextSongIndex];
+    const { sound, status } = await handleAudio(
+      nextSongDetails?.attributes?.previews[0]?.url
+    );
+    dispatch(
+      setCurrentPlayingSongDetails({
+        albumName: nextSongDetails?.attributes?.albumName,
+        artistName: nextSongDetails?.attributes?.artistName,
+        songName: nextSongDetails?.attributes?.name,
+        songImageUrl: nextSongDetails?.attributes?.artwork?.url,
+        songTrackUrl: nextSongDetails?.attributes?.previews[0]?.url,
+        songIndex: nextSongIndex,
+      })
+    );
+
+    dispatch(setAudioState(sound));
+    dispatch(setAudioStatusState(status));
+    dispatch(setCurrentPosition(0));
   }
-  
+  async function handlePlayPreviousSong() {
+    if (currentAudioState) {
+      await currentAudioState?.stopAsync();
+      await currentAudioState?.unloadAsync();
+    }
+    const songsData = resonse?.data || [];
+    const currentSongIndex = currentPlayingSongDetails?.songIndex!;
+    const previousSongIndex =
+      currentSongIndex - 1 < 0 ? songsData.length - 1 : currentSongIndex - 1;
+    const nextSongDetails = songsData?.[previousSongIndex];
+    const { sound, status } = await handleAudio(
+      nextSongDetails?.attributes?.previews[0]?.url
+    );
+    dispatch(
+      setCurrentPlayingSongDetails({
+        albumName: nextSongDetails?.attributes?.albumName,
+        artistName: nextSongDetails?.attributes?.artistName,
+        songName: nextSongDetails?.attributes?.name,
+        songImageUrl: nextSongDetails?.attributes?.artwork?.url,
+        songTrackUrl: nextSongDetails?.attributes?.previews[0]?.url,
+        songIndex: previousSongIndex,
+      })
+    );
+
+    dispatch(setAudioState(sound));
+    dispatch(setAudioStatusState(status));
+    dispatch(setCurrentPosition(0));
+  }
+
   return (
-    <View className="w-full h-full relative bg-yellow-300">
+    <View className="w-full h-full relative">
       <View className="absolute w-full h-full top-0 left-0">
         <Image
           className="w-full h-full object-cover"
@@ -90,8 +147,8 @@ const SongDetailsModal = () => {
             ),
           }}
         />
-       {/* <BlurView intensity={100} tint="default" className="absolute w-full h-full" /> */}
-       <View className="absolute w-full h-full bg-black/80" />
+        {/* <BlurView intensity={100} tint="default" className="absolute w-full h-full" /> */}
+        <View className="absolute w-full h-full bg-black/80" />
       </View>
       <View className="px-8 pt-5">
         <View className="h-14"></View>
@@ -117,7 +174,7 @@ const SongDetailsModal = () => {
             <View
               className="h-full bg-white rounded-full"
               style={{
-                width: `${100 * getIncreament()!}%`,
+                width: `${100 * getIncreamentStatus()!}%`,
               }}
             >
               <View className="w-4 h-4 rounded-full bg-white absolute -top-[6px] -right-3 z-20"></View>
@@ -130,7 +187,9 @@ const SongDetailsModal = () => {
         </View>
         <View className="flex flex-row items-center justify-between mt-14">
           <Repeat size={23} className="text-white" />
-          <SkipBack size={25} className="text-white" />
+          <TouchableHighlight onPress={handlePlayPreviousSong}>
+            <SkipBack size={25} className="text-white" />
+          </TouchableHighlight>
           <TouchableHighlight onPress={handlePlayPause}>
             <View className="w-20 h-20 flex items-center justify-center border-4 border-gray-400 bg-transparent rounded-full">
               {currentAudioStatusState?.isLoaded &&
@@ -142,7 +201,7 @@ const SongDetailsModal = () => {
             </View>
           </TouchableHighlight>
           <TouchableHighlight onPress={handlePlayNextSong}>
-          <SkipForward size={25} className="text-white" />
+            <SkipForward size={25} className="text-white" />
           </TouchableHighlight>
           <List size={23} className="text-white" />
         </View>

@@ -9,6 +9,7 @@ interface CurrentSongDetailsType {
   songName: string;
   songImageUrl: string;
   songTrackUrl: string;
+  songIndex:number;
 }
 interface InitialStateType {
   currentPlayingSongDetails: CurrentSongDetailsType | null;
@@ -24,6 +25,7 @@ const initialState: InitialStateType = {
     songName: "",
     songImageUrl: "",
     songTrackUrl: "",
+    songIndex:0,
   },
   currentAudioState:null,
   currentAudioStatusState:null,

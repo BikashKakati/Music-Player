@@ -16,6 +16,7 @@ export declare interface CurrentSongDetailsType{
 export declare interface SongListItemPropType {
   song:SongType;
   handleOpenMenu: () => void;
+  songIndex:number;
 }
 
 export declare interface SongType {

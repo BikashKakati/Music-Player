@@ -16,11 +16,12 @@ const SongList = ({
   return (
     <FlatList
       data={songList}
-      renderItem={({ item}: { item: SongType }) => (
+      renderItem={({ item, index}: { item: SongType, index:number }) => (
         <SongListItem
           handleOpenMenu={handleOpenMenu}
           song={item}
           key={item.id}
+          songIndex={index}
         />
       )}
     />
