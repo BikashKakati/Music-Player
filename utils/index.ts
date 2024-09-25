@@ -1,3 +1,11 @@
+import {
+  setAudioState,
+  setAudioStatusState,
+  setCurrentPlayingSongDetails,
+  setCurrentPosition,
+} from "@/services/redux/sliceReducers/songSlice";
+import { store } from "@/services/redux/store";
+import { SaveDataToStorePropType, SongType } from "@/types/type";
 import { Audio } from "expo-av";
 
 export function getLimitedFormattedText(
@@ -12,7 +20,6 @@ export function getLimitedFormattedText(
 export function getFormattedImageUrl(imageUrl: string) {
   return imageUrl?.replace("{w}", "300")?.replace("{h}", "300") || "";
 }
-
 
 // Song functionality
 export async function handleAudio(playbackUrl: string) {
@@ -34,31 +41,76 @@ export async function handleAudio(playbackUrl: string) {
   }
 }
 
-// async function handlePlayNextSong(){
-//   if (currentAudioState) {
-//     await currentAudioState?.stopAsync();
-//     await currentAudioState?.unloadAsync();
-//   }
-//   const songsData = resonse?.data || [];
-//   const currentSongIndex = currentPlayingSongDetails?.songIndex!;
-//   const nextSongIndex =
-//     currentSongIndex + 1 >= songsData.length - 1 ? 0 : currentSongIndex + 1;
-//   const nextSongDetails = songsData?.[nextSongIndex];
-//   const { sound, status } = await handleAudio(
-//     nextSongDetails?.attributes?.previews[0]?.url
-//   );
-//   dispatch(
-//     setCurrentPlayingSongDetails({
-//       albumName: nextSongDetails?.attributes?.albumName,
-//       artistName: nextSongDetails?.attributes?.artistName,
-//       songName: nextSongDetails?.attributes?.name,
-//       songImageUrl: nextSongDetails?.attributes?.artwork?.url,
-//       songTrackUrl: nextSongDetails?.attributes?.previews[0]?.url,
-//       songIndex: nextSongIndex,
-//     })
-//   );
+export function getFormattedTime(timeDuraton: number | undefined): string {
+  const totalSeconds = Math.floor(timeDuraton! / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+    2,
+    "0"
+  )}`;
+}
 
-//   dispatch(setAudioState(sound));
-//   dispatch(setAudioStatusState(status));
-//   dispatch(setCurrentPosition(0));
-// }
+const { getState, dispatch } = store;
+export async function handlePlayNextSong(responseData: SongType[]) {
+  if (getState().songSlice.currentAudioState) {
+    await getState().songSlice.currentAudioState?.unloadAsync();
+  }
+  const songsData = responseData || [];
+  const currentSongIndex =
+    getState().songSlice.currentPlayingSongDetails?.songIndex!;
+  const nextSongIndex =
+    currentSongIndex + 1 >= songsData.length - 1 ? 0 : currentSongIndex + 1;
+  const nextSongDetails = songsData?.[nextSongIndex];
+  const { sound, status } = await handleAudio(
+    nextSongDetails?.attributes?.previews[0]?.url
+  );
+  handleSaveDataToCentralStore({
+    sound,
+    status,
+    songDetails: nextSongDetails,
+    songIndex: nextSongIndex,
+  });
+}
+export async function handlePlayPreviousSong(responseData: SongType[]) {
+  if (getState().songSlice.currentAudioState) {
+    await getState().songSlice.currentAudioState?.unloadAsync();
+  }
+  const songsData = responseData || [];
+  const currentSongIndex =
+    getState().songSlice.currentPlayingSongDetails?.songIndex!;
+  const previousSongIndex =
+    currentSongIndex - 1 < 0 ? songsData.length - 1 : currentSongIndex - 1;
+  const previousSongDetails = songsData?.[previousSongIndex];
+  const { sound, status } = await handleAudio(
+    previousSongDetails?.attributes?.previews[0]?.url
+  );
+  handleSaveDataToCentralStore({
+    sound,
+    status,
+    songDetails: previousSongDetails,
+    songIndex: previousSongIndex,
+  });
+}
+
+export function handleSaveDataToCentralStore({
+  sound,
+  status,
+  songDetails,
+  songIndex,
+}: SaveDataToStorePropType) {
+  dispatch(
+    setCurrentPlayingSongDetails({
+      albumName: songDetails?.attributes?.albumName,
+      artistName: songDetails?.attributes?.artistName,
+      songName: songDetails?.attributes?.name,
+      songImageUrl: songDetails?.attributes?.artwork?.url,
+      songTrackUrl: songDetails?.attributes?.previews[0]?.url,
+      songIndex,
+    })
+  );
+
+  dispatch(setAudioState(sound));
+  dispatch(setAudioStatusState(status));
+  dispatch(setCurrentPosition(0));
+}
