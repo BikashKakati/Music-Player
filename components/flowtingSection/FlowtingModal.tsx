@@ -1,6 +1,7 @@
+import { useGetWorldTopSongsQuery } from "@/services/redux/apiReducers/songApi";
 import { setAudioStatusState } from "@/services/redux/sliceReducers/songSlice";
 import { RootState } from "@/services/redux/store";
-import { getFormattedImageUrl, getLimitedFormattedText } from "@/utils";
+import { getFormattedImageUrl, getLimitedFormattedText, handlePlayNextSong, handlePlayPreviousSong } from "@/utils";
 import {
   PauseCircle,
   PlayCircle,
@@ -20,6 +21,7 @@ const FlowtingModal = ({onPress}:FlowtingModalPropType) => {
   const { currentPlayingSongDetails, currentAudioState, currentAudioStatusState} = useSelector(
     (state: RootState) => state.songSlice
   );
+  const { data: response, isLoading } = useGetWorldTopSongsQuery(10);
   const dispatch = useDispatch();
 
   async function handlePrevious() {
@@ -56,7 +58,7 @@ const FlowtingModal = ({onPress}:FlowtingModalPropType) => {
         <View className="flex flex-row mr-3 h-full items-center">
           <TouchableHighlight
             className="h-fit w-fit rounded-full p-2"
-            onPress={handlePrevious}
+            onPress={()=>{handlePlayPreviousSong(response?.data)}}
           >
             <SkipBack size={20} className="text-white" />
           </TouchableHighlight>
@@ -70,7 +72,7 @@ const FlowtingModal = ({onPress}:FlowtingModalPropType) => {
           </TouchableHighlight>
           <TouchableHighlight
             className="h-fit w-fit rounded-full p-2"
-            onPress={handlePrevious}
+            onPress={()=>{handlePlayNextSong(response?.data)}}
           >
             <SkipForward size={20} className="text-white" />
           </TouchableHighlight>

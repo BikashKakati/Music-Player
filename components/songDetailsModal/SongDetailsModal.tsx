@@ -6,7 +6,7 @@ import {
   setCurrentPosition,
 } from "@/services/redux/sliceReducers/songSlice";
 import { RootState } from "@/services/redux/store";
-import { getFormattedImageUrl, handleAudio } from "@/utils";
+import { getFormattedImageUrl, getFormattedTime, handleAudio, handlePlayNextSong, handlePlayPreviousSong } from "@/utils";
 import {
   Heart,
   List,
@@ -22,7 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 const SongDetailsModal = () => {
   const dispatch = useDispatch();
-  const { data: resonse, isLoading } = useGetWorldTopSongsQuery(10);
+  const { data: response, isLoading } = useGetWorldTopSongsQuery(10);
 
   const {
     currentPlayingSongDetails,
@@ -40,15 +40,7 @@ const SongDetailsModal = () => {
     [currentSongPosition, currentAudioStatusState?.isLoaded]
   );
 
-  function getFormattedTime(timeDuraton: number | undefined): string {
-    const totalSeconds = Math.floor(timeDuraton! / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
-      2,
-      "0"
-    )}`;
-  }
+  
 
   async function handlePlayPause() {
     try {
@@ -79,62 +71,7 @@ const SongDetailsModal = () => {
     }
   }
 
-  async function handlePlayNextSong() {
-    if (currentAudioState) {
-      await currentAudioState?.stopAsync();
-      await currentAudioState?.unloadAsync();
-    }
-    const songsData = resonse?.data || [];
-    const currentSongIndex = currentPlayingSongDetails?.songIndex!;
-    const nextSongIndex =
-      currentSongIndex + 1 >= songsData.length - 1 ? 0 : currentSongIndex + 1;
-    const nextSongDetails = songsData?.[nextSongIndex];
-    const { sound, status } = await handleAudio(
-      nextSongDetails?.attributes?.previews[0]?.url
-    );
-    dispatch(
-      setCurrentPlayingSongDetails({
-        albumName: nextSongDetails?.attributes?.albumName,
-        artistName: nextSongDetails?.attributes?.artistName,
-        songName: nextSongDetails?.attributes?.name,
-        songImageUrl: nextSongDetails?.attributes?.artwork?.url,
-        songTrackUrl: nextSongDetails?.attributes?.previews[0]?.url,
-        songIndex: nextSongIndex,
-      })
-    );
 
-    dispatch(setAudioState(sound));
-    dispatch(setAudioStatusState(status));
-    dispatch(setCurrentPosition(0));
-  }
-  async function handlePlayPreviousSong() {
-    if (currentAudioState) {
-      await currentAudioState?.stopAsync();
-      await currentAudioState?.unloadAsync();
-    }
-    const songsData = resonse?.data || [];
-    const currentSongIndex = currentPlayingSongDetails?.songIndex!;
-    const previousSongIndex =
-      currentSongIndex - 1 < 0 ? songsData.length - 1 : currentSongIndex - 1;
-    const nextSongDetails = songsData?.[previousSongIndex];
-    const { sound, status } = await handleAudio(
-      nextSongDetails?.attributes?.previews[0]?.url
-    );
-    dispatch(
-      setCurrentPlayingSongDetails({
-        albumName: nextSongDetails?.attributes?.albumName,
-        artistName: nextSongDetails?.attributes?.artistName,
-        songName: nextSongDetails?.attributes?.name,
-        songImageUrl: nextSongDetails?.attributes?.artwork?.url,
-        songTrackUrl: nextSongDetails?.attributes?.previews[0]?.url,
-        songIndex: previousSongIndex,
-      })
-    );
-
-    dispatch(setAudioState(sound));
-    dispatch(setAudioStatusState(status));
-    dispatch(setCurrentPosition(0));
-  }
 
   return (
     <View className="w-full h-full relative">
@@ -147,7 +84,6 @@ const SongDetailsModal = () => {
             ),
           }}
         />
-        {/* <BlurView intensity={100} tint="default" className="absolute w-full h-full" /> */}
         <View className="absolute w-full h-full bg-black/80" />
       </View>
       <View className="px-8 pt-5">
@@ -187,7 +123,7 @@ const SongDetailsModal = () => {
         </View>
         <View className="flex flex-row items-center justify-between mt-14">
           <Repeat size={23} className="text-white" />
-          <TouchableHighlight onPress={handlePlayPreviousSong}>
+          <TouchableHighlight onPress={()=>{handlePlayPreviousSong(response?.data)}}>
             <SkipBack size={25} className="text-white" />
           </TouchableHighlight>
           <TouchableHighlight onPress={handlePlayPause}>
@@ -200,7 +136,7 @@ const SongDetailsModal = () => {
               )}
             </View>
           </TouchableHighlight>
-          <TouchableHighlight onPress={handlePlayNextSong}>
+          <TouchableHighlight onPress={()=>{handlePlayNextSong(response?.data)}}>
             <SkipForward size={25} className="text-white" />
           </TouchableHighlight>
           <List size={23} className="text-white" />

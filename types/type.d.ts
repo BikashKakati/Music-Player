@@ -1,4 +1,5 @@
-import { Audio } from "expo-av";
+import { AVPlaybackStatus, Audio } from "expo-av";
+import { Sound } from "expo-av/build/Audio";
 import React from "react";
 import { ImageSourcePropType } from "react-native";
 
@@ -41,4 +42,11 @@ export declare interface BottomSheetModalPropType {
   children: ReactNode;
   snapPoints: string[];
   color:string;
+}
+
+export declare interface SaveDataToStorePropType{
+  sound:Sound;
+  status:AVPlaybackStatus;
+  songIndex:number;
+  songDetails:SongType;
 }
