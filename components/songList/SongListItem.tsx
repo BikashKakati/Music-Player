@@ -1,4 +1,5 @@
 import { Images } from "@/constants";
+import { useGetWorldTopSongsQuery } from "@/services/redux/apiReducers/songApi";
 import {
   setAudioState,
   setAudioStatusState,
@@ -7,7 +8,7 @@ import {
 } from "@/services/redux/sliceReducers/songSlice";
 import { RootState } from "@/services/redux/store";
 import { SongListItemPropType } from "@/types/type.d";
-import { getFormattedImageUrl, getLimitedFormattedText, handleAudio } from "@/utils";
+import { getFormattedImageUrl, getLimitedFormattedText, handleAudio, handlePlayNextSong } from "@/utils";
 import { EllipsisVertical, PlayCircle } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import { Image, Text, TouchableHighlight, View } from "react-native";
@@ -21,7 +22,7 @@ const SongListItem = ({ song, handleOpenMenu,songIndex}: SongListItemPropType) =
     currentPlayingSongDetails,
     currentSongPosition,
   } = useSelector((state: RootState) => state.songSlice);
-
+  const { data: response, isLoading } = useGetWorldTopSongsQuery(10);
   const timeIntervalRef = useRef<any>(null);
 
   useEffect(() => {
@@ -48,9 +49,9 @@ const SongListItem = ({ song, handleOpenMenu,songIndex}: SongListItemPropType) =
         currentSongPosition >= Math.round(currentAudioStatusState.durationMillis! / 1000) * 1000
     ) {
       timeIntervalRef.current = null;
-      const status = await currentAudioState?.stopAsync();
-      dispatch(setAudioStatusState(status));
+      await handlePlayNextSong(response?.data);
       return;
+
     }
 
     if (
@@ -103,14 +104,7 @@ const SongListItem = ({ song, handleOpenMenu,songIndex}: SongListItemPropType) =
           if (currentAudioStatusState.isPlaying) {
             await currentAudioState.pauseAsync();
           } else {
-            if (
-              Math.round(currentAudioStatusState.durationMillis! / 1000) * 1000 >
-              currentSongPosition
-            ) {
-              await currentAudioState.playAsync();
-            } else {
-              await currentAudioState.replayAsync({ shouldPlay: true });
-            }
+            await currentAudioState.playAsync();
           }
     
           const status = await currentAudioState.getStatusAsync();
