@@ -13,8 +13,11 @@ export const songApi = createApi({
     endpoints:(builder)=>({
         getWorldTopSongs: builder.query({
             query:(limit)=> `/charts/get-top-songs-in-world?limit=${limit}`
+        }),
+        getSongsByGenre: builder.query({
+            query:({genreType,limit})=> `/charts/get-top-songs-in_world_by_genre?genre=${genreType}&limit=${limit}`
         })
     })
 })
 
-export const {useGetWorldTopSongsQuery} = songApi
+export const {useGetWorldTopSongsQuery, useGetSongsByGenreQuery} = songApi
