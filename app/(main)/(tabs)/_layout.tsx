@@ -25,8 +25,9 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen 
-      name="search" 
+      name="search"
       options={{
+        headerShown:false,
         tabBarIcon: ({ color, focused }) => (
           <TabsIcon color={color} focused={focused} label="Search">
             {<Search className="h-4 w-4" color={color} />}

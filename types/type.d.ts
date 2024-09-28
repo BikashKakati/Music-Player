@@ -50,3 +50,8 @@ export declare interface SaveDataToStorePropType{
   songIndex:number;
   songDetails:SongType;
 }
+export declare interface GenresPropType{
+  title:string,
+  value:string,
+  imageUrl?:ImageSourcePropType,
+}
