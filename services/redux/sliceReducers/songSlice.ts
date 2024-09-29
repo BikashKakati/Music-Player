@@ -16,6 +16,7 @@ interface InitialStateType {
   currentAudioState: Sound | null;
   currentAudioStatusState: AVPlaybackStatus | null;
   currentSongPosition:number;
+  songsQueueList:SongType[];
 }
 
 const initialState: InitialStateType = {
@@ -30,6 +31,7 @@ const initialState: InitialStateType = {
   currentAudioState:null,
   currentAudioStatusState:null,
   currentSongPosition:0,
+  songsQueueList:[],
 };
 export const songSlice = createSlice({
   name: "songSlice",
@@ -46,6 +48,9 @@ export const songSlice = createSlice({
     },
     setCurrentPosition:function(state,action){
       state.currentSongPosition = action.payload;
+    },
+    setSongsQueueList:function(state,action){
+      state.songsQueueList = action.payload;
     }
   },
 });
@@ -54,5 +59,6 @@ export const {
   setAudioState,
   setCurrentPlayingSongDetails,
   setAudioStatusState,
-  setCurrentPosition
+  setCurrentPosition,
+  setSongsQueueList
 } = songSlice.actions;
