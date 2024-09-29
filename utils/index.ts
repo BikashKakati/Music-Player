@@ -52,11 +52,11 @@ export function getFormattedTime(timeDuraton: number | undefined): string {
 }
 
 const { getState, dispatch } = store;
-export async function handlePlayNextSong(responseData: SongType[]) {
+export async function handlePlayNextSong() {
   if (getState().songSlice.currentAudioState) {
     await getState().songSlice.currentAudioState?.unloadAsync();
   }
-  const songsData = responseData || [];
+  const songsData = getState().songSlice.songsQueueList;
   const currentSongIndex =
     getState().songSlice.currentPlayingSongDetails?.songIndex!;
   const nextSongIndex =
@@ -72,11 +72,11 @@ export async function handlePlayNextSong(responseData: SongType[]) {
     songIndex: nextSongIndex,
   });
 }
-export async function handlePlayPreviousSong(responseData: SongType[]) {
+export async function handlePlayPreviousSong() {
   if (getState().songSlice.currentAudioState) {
     await getState().songSlice.currentAudioState?.unloadAsync();
   }
-  const songsData = responseData || [];
+  const songsData = getState().songSlice.songsQueueList;
   const currentSongIndex =
     getState().songSlice.currentPlayingSongDetails?.songIndex!;
   const previousSongIndex =

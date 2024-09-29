@@ -22,7 +22,6 @@ import { useDispatch, useSelector } from "react-redux";
 
 const SongDetailsModal = () => {
   const dispatch = useDispatch();
-  const { data: response, isLoading } = useGetWorldTopSongsQuery(10);
 
   const {
     currentPlayingSongDetails,
@@ -123,7 +122,7 @@ const SongDetailsModal = () => {
         </View>
         <View className="flex flex-row items-center justify-between mt-14">
           <Repeat size={23} className="text-white" />
-          <TouchableHighlight onPress={()=>{handlePlayPreviousSong(response?.data)}}>
+          <TouchableHighlight onPress={()=>{handlePlayPreviousSong()}}>
             <SkipBack size={25} className="text-white" />
           </TouchableHighlight>
           <TouchableHighlight onPress={handlePlayPause}>
@@ -136,7 +135,7 @@ const SongDetailsModal = () => {
               )}
             </View>
           </TouchableHighlight>
-          <TouchableHighlight onPress={()=>{handlePlayNextSong(response?.data)}}>
+          <TouchableHighlight onPress={()=>{handlePlayNextSong()}}>
             <SkipForward size={25} className="text-white" />
           </TouchableHighlight>
           <List size={23} className="text-white" />

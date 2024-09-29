@@ -11,7 +11,7 @@ import { SongListItemPropType } from "@/types/type.d";
 import { getFormattedImageUrl, getLimitedFormattedText, handleAudio, handlePlayNextSong } from "@/utils";
 import { EllipsisVertical, PlayCircle } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
-import { Image, Text, TouchableHighlight, View } from "react-native";
+import { Image, Pressable, Text, TouchableHighlight, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const SongListItem = ({ song, handleOpenMenu,songIndex}: SongListItemPropType) => {
@@ -49,7 +49,7 @@ const SongListItem = ({ song, handleOpenMenu,songIndex}: SongListItemPropType) =
         currentSongPosition >= Math.round(currentAudioStatusState.durationMillis! / 1000) * 1000
     ) {
       timeIntervalRef.current = null;
-      await handlePlayNextSong(response?.data);
+      await handlePlayNextSong();
       return;
 
     }
@@ -173,10 +173,11 @@ const SongListItem = ({ song, handleOpenMenu,songIndex}: SongListItemPropType) =
           </Text>
         </View>
         <View className="flex flex-row space-x-2 items-center">
+          <Pressable onPress={handleOpenMenu}>
           <EllipsisVertical
             className="h-4 w-4 p-2 text-muted"
-            onPress={handleOpenMenu}
           />
+          </Pressable>
         </View>
       </View>
     </TouchableHighlight>

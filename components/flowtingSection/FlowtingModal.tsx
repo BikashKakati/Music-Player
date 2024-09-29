@@ -21,13 +21,9 @@ const FlowtingModal = ({onPress}:FlowtingModalPropType) => {
   const { currentPlayingSongDetails, currentAudioState, currentAudioStatusState} = useSelector(
     (state: RootState) => state.songSlice
   );
-  const { data: response, isLoading } = useGetWorldTopSongsQuery(10);
   const dispatch = useDispatch();
 
-  async function handlePrevious() {
-   const status = await currentAudioState?.pauseAsync();
-   dispatch(setAudioStatusState(status));
-  }
+ 
   async function handlePlayPause(){
     if(currentAudioStatusState?.isLoaded && currentAudioStatusState.isPlaying){
       const status = await currentAudioState?.pauseAsync();
@@ -58,7 +54,7 @@ const FlowtingModal = ({onPress}:FlowtingModalPropType) => {
         <View className="flex flex-row mr-3 h-full items-center">
           <TouchableHighlight
             className="h-fit w-fit rounded-full p-2"
-            onPress={()=>{handlePlayPreviousSong(response?.data)}}
+            onPress={()=>{handlePlayPreviousSong()}}
           >
             <SkipBack size={20} className="text-white" />
           </TouchableHighlight>
@@ -72,7 +68,7 @@ const FlowtingModal = ({onPress}:FlowtingModalPropType) => {
           </TouchableHighlight>
           <TouchableHighlight
             className="h-fit w-fit rounded-full p-2"
-            onPress={()=>{handlePlayNextSong(response?.data)}}
+            onPress={()=>{handlePlayNextSong()}}
           >
             <SkipForward size={20} className="text-white" />
           </TouchableHighlight>
