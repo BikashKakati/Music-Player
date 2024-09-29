@@ -1,12 +1,11 @@
-import { View, Text, Image, ImageSourcePropType, Pressable } from 'react-native'
-import React from 'react'
-import { Images } from '@/constants'
 import { GenresPropType } from '@/types/type'
-import { router} from 'expo-router'
+import { router } from 'expo-router'
+import React from 'react'
+import { Image, ImageSourcePropType, Pressable, Text, View } from 'react-native'
 
 const GenresCard = ({genreData, index}:{genreData:GenresPropType, index:number}) => {
   function handleSelectGenre(genreType:string){
-    router.push(`/(search)/searches/${genreType}`);
+    router.push(`/(search)/search-results/${genreType}`);
   }
   return (
    <Pressable onPress={()=>{handleSelectGenre(genreData.value)}}>
