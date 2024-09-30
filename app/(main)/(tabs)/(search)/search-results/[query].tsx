@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useGetSongsByGenreQuery } from "@/services/redux/apiReducers/songApi";
 import Wrapper from "@/components/Wrapper";
@@ -22,11 +22,19 @@ const SearchResults = () => {
     }
   }, [response]);
 
+  const formattedTitle = useCallback(function (title:string):string{
+    if(title.includes("_")){
+      const words = title.split("_");
+      return words.join(" ").toLowerCase();
+    }
+    return title.toLowerCase();
+  },[])
+
   return (
     <Wrapper safeArea={false}>
       <Stack.Screen
         options={{
-          title: `Dive into ${(query as string).toLowerCase()} music`,
+          title: `Dive into ${formattedTitle((query as string))} music`,
         }}
       />
       {isLoading ? <Loader /> : <SongList songList={response?.data || []} />}
