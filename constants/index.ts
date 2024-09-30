@@ -28,7 +28,7 @@ export const genres = [
     { title: 'Alternative', value: 'ALTERNATIVE',imageUrl:alternative },
     { title: 'Rock', value: 'ROCK', imageUrl:rock},
     { title: 'Latin', value: 'LATIN',imageUrl: latin},
-    { title: 'Film', value: 'FILM_TV',imageUrl:film },
+    { title: 'Country', value: 'COUNTRY',imageUrl:film },
     { title: 'House', value: 'HOUSE',imageUrl:house },
     { title: 'K-Pop', value: 'K_POP',imageUrl:kPop },
   ];
