@@ -1,7 +1,7 @@
 import GenresCard from "@/components/GenresCard";
 import Wrapper from "@/components/Wrapper";
 import { genres } from "@/constants";
-import { useLazyGetSongsBySearchQueryQuery } from "@/services/redux/apiReducers/songApi";
+import { router } from "expo-router";
 import { Search } from "lucide-react-native";
 import React, { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
@@ -9,16 +9,9 @@ import { TextInput } from "react-native-gesture-handler";
 
 const SearchTrack = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [getSongsBySearchQuery] = useLazyGetSongsBySearchQueryQuery();
 
   async function handleSearchQuery() {
-    const formattedSearchQuery = searchQuery.toLocaleLowerCase().split(" ").join("%20");
-    console.log(formattedSearchQuery);
-    const { data: response } = await getSongsBySearchQuery({
-      searchQuery: formattedSearchQuery,
-      limit: 10,
-    });
-    console.log(response.data.tracks);
+   router.push(`/(search)/search-results/${searchQuery}`);
   }
 
   return (

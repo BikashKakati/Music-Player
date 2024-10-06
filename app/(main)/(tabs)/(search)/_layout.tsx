@@ -5,6 +5,7 @@ const Search = () => {
   return (
     <Stack>
       <Stack.Screen name="index" options={{headerShown:false}}/>
+      <Stack.Screen name="genre-results/[genre]"/>
       <Stack.Screen name="search-results/[query]"/>
     </Stack>
   );

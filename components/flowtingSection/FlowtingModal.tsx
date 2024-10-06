@@ -37,7 +37,7 @@ const FlowtingModal = ({onPress}:FlowtingModalPropType) => {
   return (
     <TouchableHighlight onPress={onPress}>
       <View className="absolute h-16 w-full bottom-[50px] left-0 right-0">
-      <View className="w-[330px] h-full bg-zinc-800 mx-auto rounded-lg overflow-hidden flex flex-row items-center justify-between">
+      <View className="w-[90%] h-full bg-zinc-800 mx-auto rounded-lg overflow-hidden flex flex-row items-center justify-between">
         <View className="flex-1 flex flex-row items-center space-x-3 h-full">
           <Image
             source={{

@@ -1,20 +1,23 @@
-import { View, Text } from "react-native";
-import React, { useCallback, useEffect } from "react";
-import { Stack, router, useLocalSearchParams } from "expo-router";
-import { useGetSongsByGenreQuery } from "@/services/redux/apiReducers/songApi";
 import Wrapper from "@/components/Wrapper";
-import Loader from "@/components/Loader";
-import SongList from "@/components/songList/SongList";
+import { useGetSongsBySearchQuery } from "@/services/redux/apiReducers/songApi";
 import { setSongsQueueList } from "@/services/redux/sliceReducers/songSlice";
+import { Stack, useLocalSearchParams } from "expo-router";
+import React, { useCallback, useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-const SearchResults = () => {
+const SearchResultsByQuery = () => {
   const { query } = useLocalSearchParams();
   const dispatch = useDispatch();
-  const { data: response, isLoading } = useGetSongsByGenreQuery({
-    genreType: query,
+  const { data: response, isLoading } = useGetSongsBySearchQuery({
+    genreType: getFormattedQuery(query as string),
     limit: 10,
   });
+  console.log(response?.data)
+
+  function getFormattedQuery(query:string):string{
+    return query.toLocaleLowerCase().split(" ").join("%20");
+  }
+ 
 
   useEffect(() => {
     if (response) {
@@ -37,9 +40,9 @@ const SearchResults = () => {
           title: `Dive into ${formattedTitle((query as string))} music`,
         }}
       />
-      {isLoading ? <Loader /> : <SongList songList={response?.data || []} />}
+      {/* {isLoading ? <Loader /> : <SongList songList={response?.data || []} />} */}
     </Wrapper>
   );
 };
 
-export default SearchResults;
+export default SearchResultsByQuery;

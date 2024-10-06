@@ -17,10 +17,10 @@ export const songApi = createApi({
         getSongsByGenre: builder.query({
             query:({genreType,limit})=> `/charts/get-top-songs-in_world_by_genre?genre=${genreType}&limit=${limit}`
         }),
-        getSongsBySearchQuery:builder.query({
+        getSongsBySearch:builder.query({
             query:({searchQuery,limit})=>`/search?term=${searchQuery}&limit=${limit}`
         }),
     })
 })
 
-export const {useGetWorldTopSongsQuery, useGetSongsByGenreQuery,useLazyGetSongsBySearchQueryQuery} = songApi
+export const {useGetWorldTopSongsQuery, useGetSongsByGenreQuery,useGetSongsBySearchQuery} = songApi

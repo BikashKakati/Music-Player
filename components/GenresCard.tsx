@@ -5,7 +5,7 @@ import { Image, ImageSourcePropType, Pressable, Text, View } from 'react-native'
 
 const GenresCard = ({genreData, index}:{genreData:GenresPropType, index:number}) => {
   function handleSelectGenre(genreType:string){
-    router.push(`/(search)/search-results/${genreType}`);
+    router.push(`/(search)/genre-results/${genreType}`);
   }
   return (
    <Pressable onPress={()=>{handleSelectGenre(genreData.value)}}>
